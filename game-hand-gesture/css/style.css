@@ -1,0 +1,18 @@
+/* Global styles for Hand Gesture Mining Game */
+* { box-sizing: border-box; }
+body { margin:0; font-family: Inter, Arial, sans-serif; background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+.game-wrapper { display:grid; grid-template-columns: 1fr 1fr; gap:20px; width:100%; max-width:1400px; background: #fff; padding:20px; border-radius:12px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.video-container { position:relative; background:#000; border-radius:8px; overflow:hidden; max-width:640px; }
+#video { display:none; }
+#video-canvas { width:100%; height:auto; display:block; }
+#game-canvas { width:100%; height:auto; background: linear-gradient(180deg,#87ceeb 0%,#e0f6ff 100%); border-radius:8px; border:3px solid #667eea; }
+.ui-panel { margin-top:12px; display:flex; gap:12px; align-items:center; }
+.stats { display:flex; gap:10px; }
+.stat-item { background: linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding:10px 14px; border-radius:8px; text-align:center; min-width:90px; }
+.stat-item .label { font-size:12px; opacity:0.9; }
+.stat-item .value { font-size:20px; font-weight:700; }
+.gesture-display { background:#f3f4f6; padding:10px 12px; border-radius:8px; font-weight:700; min-width:180px; text-align:center; }
+.gesture-display.active { background:#ffd700; }
+.restart-btn { padding:10px 14px; border-radius:8px; border:none; background:linear-gradient(135deg,#10b981,#059669); color:white; font-weight:700; cursor:pointer; }
+.restart-btn.hidden { display:none; }
+@media (max-width:1024px) { .game-wrapper { grid-template-columns: 1fr; max-width:640px; } }

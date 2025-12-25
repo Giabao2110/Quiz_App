@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hand Gesture Mining Game</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- MediaPipe Tasks Vision (uses CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0"></script>
+</head>
+<body>
+    <div class="game-wrapper">
+        <div class="left-panel">
+            <div class="video-container">
+                <video id="video" width="640" height="480" playsinline></video>
+                <canvas id="video-canvas" width="640" height="480"></canvas>
+            </div>
+        </div>
+        <div class="right-panel">
+            <canvas id="game-canvas" width="640" height="480"></canvas>
+            <div class="ui-panel">
+                <div class="stats">
+                    <div class="stat-item"><div class="label">Level</div><div id="level" class="value">1</div></div>
+                    <div class="stat-item"><div class="label">Coins</div><div id="coins" class="value">0</div></div>
+                    <div class="stat-item"><div class="label">Score</div><div id="score" class="value">0</div></div>
+                </div>
+                <div id="gesture-display" class="gesture-display">Detecting...</div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button id="mirror-toggle" class="restart-btn">🔁 Mirror Camera</button>
+                    <button id="rotate-toggle" class="restart-btn">⤾ Rotate</button>
+                    <button id="restart-btn" class="restart-btn hidden">🔄 Restart</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

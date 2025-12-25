@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIA BẢO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';</script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #ec4899;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-color: #f3f4f6;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #e0e7ff 0%, #f3f4f6 100%); margin: 0; padding: 20px; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text-main); }
+        .app-container { background: rgba(255, 255, 255, 0.95); width: 100%; max-width: 850px; padding: 40px; border-radius: 24px; box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.15); backdrop-filter: blur(10px); }
+        
+        h1 { text-align: center; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; font-size: 2.5rem; margin-bottom: 10px; }
+        h2 { font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        
+        /* Upload & Input */
+        .upload-area { border: 2px dashed #cbd5e1; border-radius: 16px; padding: 30px; text-align: center; cursor: pointer; transition: 0.3s; background: #f8fafc; }
+        .upload-area:hover { border-color: var(--primary); background: #eef2ff; }
+        textarea { width: 100%; height: 120px; padding: 15px; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; margin-top: 20px; resize: vertical; font-family: inherit; }
+        
+        /* Buttons */
+        button { width: 100%; padding: 14px; margin-top: 15px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, var(--primary), #4338ca); color: white; transition: 0.3s; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4); }
+        button.secondary { background: #f1f5f9; color: var(--text-main); box-shadow: none; border: 1px solid #e2e8f0; }
+        button.secondary:hover { background: #e2e8f0; }
+        button.outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); box-shadow: none; }
+        button.outline:hover { background: var(--primary); color: white; }
+
+        /* Quiz UI */
+        .edit-container, .review-container { max-height: 500px; overflow-y: auto; padding-right: 5px; }
+        .edit-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 600; display: inline-block; margin-top: 5px;}
+        .badge-success { background: #d1fae5; color: #065f46; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+
+        .question-card { background: white; padding: 25px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border: 1px solid #f1f5f9; }
+        .q-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; }
+        .ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .ans-label { display: flex; align-items: center; padding: 12px 15px; background: #f8fafc; border: 2px solid transparent; border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 0.95rem; color: var(--text-sub); }
+        .ans-label:hover { background: #eef2ff; color: var(--primary); }
+        .ans-label:has(input:checked) { border-color: var(--primary); background: #e0e7ff; color: var(--primary); font-weight: 600; }
+        input[type="radio"] { margin-right: 10px; accent-color: var(--primary); transform: scale(1.1); }
+
+        /* --- STYLES CHO REVIEW MODE (MỚI) --- */
+        .review-card { padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #eee; background: white; }
+        .review-card.correct { border-left: 5px solid var(--success); background: #f0fdf4; }
+        .review-card.wrong { border-left: 5px solid var(--danger); background: #fef2f2; }
+        
+        .ans-review { padding: 10px; border-radius: 8px; margin-bottom: 5px; font-size: 0.9rem; border: 1px solid transparent; opacity: 0.7; }
+        
+        /* Đáp án người dùng chọn đúng */
+        .user-correct { background: #d1fae5; color: #065f46; border-color: var(--success); opacity: 1; font-weight: bold; }
+        /* Đáp án người dùng chọn sai */
+        .user-wrong { background: #fee2e2; color: #991b1b; border-color: var(--danger); opacity: 1; font-weight: bold; text-decoration: line-through; }
+        /* Đáp án đúng thực tế (khi người dùng chọn sai) */
+        .actual-correct { background: #d1fae5; color: #065f46; border-color: var(--success); opacity: 1; font-weight: bold; box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
+
+        /* Result Screen */
+        .score-circle { width: 140px; height: 140px; margin: 0 auto 20px; border-radius: 50%; background: conic-gradient(var(--primary) 0%, #e2e8f0 0%); display: flex; justify-content: center; align-items: center; position: relative; }
+        .score-circle::before { content: ''; position: absolute; width: 120px; height: 120px; background: white; border-radius: 50%; }
+        .score-number { position: relative; font-size: 2.2rem; font-weight: 800; color: var(--primary); }
+        
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 600px) { .ans-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="app-container fade-in">
+    <h1>ÔN THI CUỐI KÌ I HOÀNG - ANH</h1>
+
+    <div id="input-section">
+        <h2>📂 Bước 1: Nạp Dữ Liệu</h2>
+        <div class="upload-area" onclick="document.getElementById('inp-file').click()">
+            <span style="font-size: 30px;">☁️</span><br>
+            <strong>Tải file (.docx, .pdf, .txt)</strong>
+            <input type="file" id="inp-file" accept=".txt,.docx,.pdf" class="hidden" onchange="xuLyFile(this)">
+        </div>
+        <textarea id="smart-text" placeholder="Hoặc dán nội dung vào đây... (Hỗ trợ 1 dòng)"></textarea>
+        <button onclick="xuLyNhapLieu()">✨ Phân Tích & Tiếp Tục</button>
+    </div>
+
+    <div id="edit-section" class="hidden fade-in">
+        <h2>⚙️ Bước 2: Kiểm Tra Đáp Án</h2>
+        <div id="edit-list" class="edit-container"></div>
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 15px; margin-top: 20px;">
+            <button class="secondary" onclick="quayLaiBuoc1()">⬅️ Quay lại</button>
+            <button onclick="batDauLamBai()">🚀 Bắt Đầu Làm Bài</button>
+        </div>
+    </div>
+
+    <div id="quiz-section" class="hidden fade-in">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>📝 Bài Thi</h2>
+            <span style="background: #e0e7ff; color: var(--primary); padding: 5px 12px; border-radius: 20px; font-weight: 600;" id="quiz-badge"></span>
+        </div>
+        <div id="quiz-container"></div>
+        <button onclick="nopBai()">✅ Nộp Bài Thi</button>
+    </div>
+
+    <div id="result-section" class="hidden fade-in" style="text-align: center;">
+        <h2>🏆 Kết Quả</h2>
+        <div class="score-circle" id="score-circle-bg">
+            <span class="score-number" id="score-display">0</span>
+        </div>
+        <h3 id="msg-congrats" style="color: var(--text-main); margin-bottom: 30px;"></h3>
+        
+        <button onclick="xemLaiBai()" style="background: linear-gradient(135deg, #10b981, #059669); margin-bottom: 10px;">🔍 Xem Chi Tiết Đáp Án</button>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <button class="secondary" onclick="lamLaiBai()">🔄 Làm Lại</button> 
+            <button class="outline" onclick="location.reload()">🆕 Đề Mới</button> 
+        </div>
+    </div>
+
+    <div id="review-section" class="hidden fade-in">
+        <h2>🔍 Xem Lại Bài Làm</h2>
+        <p style="color: #666; margin-bottom: 20px;">Màu xanh: Đúng | Màu đỏ: Sai</p>
+        <div id="review-container" class="review-container"></div>
+        <button onclick="quayLaiKetQua()">🔙 Quay Về Kết Quả</button>
+    </div>
+</div>
+
+<script>
+    let danhSachCauHoi = [];
+
+    // --- LOGIC FILE & PARSE (GIỮ NGUYÊN TỐI ƯU) ---
+    async function xuLyFile(input) {
+        let file = input.files[0];
+        if (!file) return;
+        document.getElementById('smart-text').value = "⏳ Đang đọc file...";
+        try {
+            let text = "";
+            if (file.name.endsWith('.docx')) {
+                let arrayBuffer = await file.arrayBuffer();
+                let result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                text = result.value;
+            } else if (file.name.endsWith('.pdf')) {
+                text = await readPdfFile(file);
+            } else { text = await file.text(); }
+            document.getElementById('smart-text').value = text;
+        } catch (err) { alert("Lỗi: " + err.message); }
+    }
+    async function readPdfFile(file) {
+        let arrayBuffer = await file.arrayBuffer();
+        let pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+            let page = await pdf.getPage(i);
+            let textContent = await page.getTextContent();
+            fullText += textContent.items.map(item => item.str).join(" ") + "\n";
+        }
+        return fullText;
+    }
+
+    function xuLyNhapLieu() {
+        let textRaw = document.getElementById('smart-text').value;
+        if (!textRaw.trim()) { alert("Vui lòng nhập nội dung!"); return; }
+        phanTichVanBan(textRaw);
+        if (danhSachCauHoi.length === 0) { alert("Không tìm thấy câu hỏi!"); return; }
+        hienThiManHinhSua();
+    }
+
+    function phanTichVanBan(textRaw) {
+        let text = textRaw.replace(/\r\n/g, "\n").replace(/\t/g, " "); 
+        let lines = text.split('\n');
+        let questions = [];
+        let currentQuestion = null;
+        const regexCauHoi = /^(?:Câu|câu)\s*\d+[\.:]?\s*(.*)/i;
+        
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            if (line === "" || line.toUpperCase().includes("PHẦN ")) continue;
+            let matchCauHoi = line.match(regexCauHoi);
+            
+            if (matchCauHoi) {
+                if (currentQuestion) hoanThienCauHoi(currentQuestion, questions);
+                let phanNoiDung = matchCauHoi[1].trim();
+                let indexA = phanNoiDung.search(/(^|\s)A[\)\.:\-]\s/);
+                if (indexA !== -1) {
+                    let cauHoiText = phanNoiDung.substring(0, indexA).trim();
+                    let remainingOpts = phanNoiDung.substring(indexA).trim();
+                    currentQuestion = { noidung: cauHoiText, type: 'trac_nghiem', optionsRaw: [remainingOpts] };
+                } else {
+                    currentQuestion = { noidung: phanNoiDung, type: 'trac_nghiem', optionsRaw: [] };
+                }
+            } else if (currentQuestion) {
+                if (line.match(/(^|\s)[A-D][\)\.:\-]\s/)) currentQuestion.optionsRaw.push(line);
+                else {
+                    if (currentQuestion.optionsRaw.length === 0) currentQuestion.noidung += " " + line;
+                    else {
+                        let lastIdx = currentQuestion.optionsRaw.length - 1;
+                        currentQuestion.optionsRaw[lastIdx] += " " + line;
+                    }
+                }
+            }
+        }
+        if (currentQuestion) hoanThienCauHoi(currentQuestion, questions);
+        danhSachCauHoi = questions;
+    }
+
+    function hoanThienCauHoi(q, list) {
+        let fullOptionStr = q.optionsRaw.join(" "); 
+        let regexTimDapAn = /(?:đáp\s*án(?:\s*đúng)?|dap\s*an|DA)[\s:\-\.]*([A-D])/i;
+        let matchDapAn = fullOptionStr.match(regexTimDapAn);
+        let dapAnDung = "A"; let isDetected = false;
+        if (matchDapAn) {
+            dapAnDung = matchDapAn[1].toUpperCase();
+            isDetected = true;
+            fullOptionStr = fullOptionStr.replace(matchDapAn[0], "").replace(/[-–—.]+\s*$/, "").trim();
+        }
+        let regexSplit = /([A-D])[\)\.:\-]\s*([\s\S]*?)(?=(?:\s+[A-D][\)\.:\-])|$)/g;
+        let finalOpts = { A: "...", B: "...", C: "...", D: "..." };
+        let match;
+        while ((match = regexSplit.exec(fullOptionStr)) !== null) { finalOpts[match[1]] = match[2].trim(); }
+        list.push({ noidung: q.noidung, a: finalOpts.A, b: finalOpts.B, c: finalOpts.C, d: finalOpts.D, dung: dapAnDung, detected: isDetected, userChoice: null });
+    }
+
+    // --- UI FUNCTIONS ---
+    function hienThiManHinhSua() {
+        document.getElementById('input-section').classList.add('hidden');
+        document.getElementById('edit-section').classList.remove('hidden');
+        let html = "";
+        danhSachCauHoi.forEach((ch, i) => {
+            let status = ch.detected ? `<span class="badge badge-success">✅ Tự chọn: ${ch.dung}</span>` : `<span class="badge badge-warning">⚠️ Mặc định: A</span>`;
+            html += `<div class="edit-card"><div style="flex:1; margin-right:15px;"><div style="font-weight:600;">Câu ${i+1}: ${ch.noidung}</div>${status}</div>
+                <select onchange="danhSachCauHoi[${i}].dung = this.value">
+                    <option value="A" ${ch.dung === 'A' ? 'selected' : ''}>A</option>
+                    <option value="B" ${ch.dung === 'B' ? 'selected' : ''}>B</option>
+                    <option value="C" ${ch.dung === 'C' ? 'selected' : ''}>C</option>
+                    <option value="D" ${ch.dung === 'D' ? 'selected' : ''}>D</option>
+                </select></div>`;
+        });
+        document.getElementById('edit-list').innerHTML = html;
+    }
+    function quayLaiBuoc1() { document.getElementById('edit-section').classList.add('hidden'); document.getElementById('input-section').classList.remove('hidden'); }
+
+    function batDauLamBai() {
+        document.getElementById('edit-section').classList.add('hidden');
+        document.getElementById('quiz-section').classList.remove('hidden');
+        document.getElementById('quiz-badge').innerText = `${danhSachCauHoi.length} câu`;
+        let html = "";
+        danhSachCauHoi.forEach((ch, i) => {
+            html += `<div class="question-card"><div class="q-title">Câu ${i + 1}: ${ch.noidung}</div>
+                <div class="ans-grid">
+                    <label class="ans-label"><input type="radio" name="q${i}" value="A"> A. ${ch.a}</label>
+                    <label class="ans-label"><input type="radio" name="q${i}" value="B"> B. ${ch.b}</label>
+                    <label class="ans-label"><input type="radio" name="q${i}" value="C"> C. ${ch.c}</label>
+                    <label class="ans-label"><input type="radio" name="q${i}" value="D"> D. ${ch.d}</label>
+                </div></div>`;
+        });
+        document.getElementById('quiz-container').innerHTML = html;
+    }
+
+    function nopBai() {
+        let diem = 0;
+        danhSachCauHoi.forEach((ch, i) => {
+            let options = document.getElementsByName(`q${i}`);
+            let choice = null;
+            for (let opt of options) if (opt.checked) choice = opt.value;
+            
+            // LƯU ĐÁP ÁN NGƯỜI DÙNG CHỌN
+            ch.userChoice = choice;
+
+            if (choice === ch.dung) diem++;
+        });
+
+        document.getElementById('quiz-section').classList.add('hidden');
+        document.getElementById('result-section').classList.remove('hidden');
+        
+        let tile = diem / danhSachCauHoi.length;
+        let percent = Math.round(tile * 100);
+        document.getElementById('score-display').innerText = `${diem}/${danhSachCauHoi.length}`;
+        document.getElementById('score-circle-bg').style.background = `conic-gradient(var(--primary) ${percent}%, #e2e8f0 0%)`;
+        
+        let msg = tile === 1 ? "Tuyệt đối! 🌟" : tile >= 0.8 ? "Rất xuất sắc! 🔥" : tile >= 0.5 ? "Khá tốt! 👍" : "Cố gắng hơn nhé 💪";
+        document.getElementById('msg-congrats').innerText = msg;
+    }
+
+    // --- HÀM MỚI: XEM LẠI BÀI (REVIEW) ---
+    function xemLaiBai() {
+        document.getElementById('result-section').classList.add('hidden');
+        document.getElementById('review-section').classList.remove('hidden');
+
+        let html = "";
+        danhSachCauHoi.forEach((ch, i) => {
+            // Xác định trạng thái câu hỏi
+            let isCorrect = (ch.userChoice === ch.dung);
+            let cardClass = isCorrect ? 'correct' : 'wrong';
+            let statusIcon = isCorrect ? '✅ Đúng' : '❌ Sai';
+
+            // Tạo các dòng đáp án với style tương ứng
+            let renderOption = (key, content) => {
+                let className = "ans-review";
+                // Nếu đây là đáp án đúng
+                if (key === ch.dung) {
+                    if (!isCorrect && ch.userChoice !== key) className += " actual-correct"; // Người dùng chọn sai, nhưng đây là đáp án đúng
+                    else if (isCorrect) className += " user-correct"; // Người dùng chọn đúng
+                }
+                // Nếu đây là đáp án người dùng chọn (nhưng sai)
+                else if (key === ch.userChoice && !isCorrect) {
+                    className += " user-wrong";
+                }
+                return `<div class="${className}">${key}. ${content}</div>`;
+            };
+
+            html += `
+                <div class="review-card ${cardClass}">
+                    <div style="font-weight:bold; margin-bottom:10px;">
+                        Câu ${i+1}: ${ch.noidung} <span style="float:right; font-size:0.8rem">${statusIcon}</span>
+                    </div>
+                    ${renderOption('A', ch.a)}
+                    ${renderOption('B', ch.b)}
+                    ${renderOption('C', ch.c)}
+                    ${renderOption('D', ch.d)}
+                    ${!ch.userChoice ? '<div style="color:red; font-size:0.8rem; margin-top:5px;">⚠️ Bạn chưa chọn đáp án</div>' : ''}
+                </div>
+            `;
+        });
+        document.getElementById('review-container').innerHTML = html;
+    }
+
+    function quayLaiKetQua() {
+        document.getElementById('review-section').classList.add('hidden');
+        document.getElementById('result-section').classList.remove('hidden');
+    }
+
+    function lamLaiBai() {
+        document.getElementById('result-section').classList.add('hidden');
+        document.getElementById('quiz-section').classList.remove('hidden');
+        danhSachCauHoi.forEach((ch, i) => {
+            let options = document.getElementsByName(`q${i}`);
+            for (let opt of options) opt.checked = false;
+        });
+        document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

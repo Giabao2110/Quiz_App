@@ -1,0 +1,32 @@
+Câu 1: Thủ đô của Việt Nam là gì? A. Huế B. Hà Nội C. TP.HCM D. Đà Nẵng đáp án đúng B
+Câu 2: Công thức hóa học của nước là? A. HO B. H2O C. CO2 D. O2 DA B
+Câu 3: Ai là người phát minh ra bóng đèn điện?
+A. Thomas Edison
+B. Nikola Tesla
+C. Albert Einstein
+D. Isaac Newton
+Đáp án đúng: A
+Câu 4: Đâu là hành tinh lớn nhất trong hệ mặt trời? A. Sao Hỏa B. Sao Kim C. Sao Mộc D. Sao Thổ đáp án C
+Câu 5: Con vật nào sau đây đẻ trứng? A. Cá Voi B. Thú Mỏ Vịt C. Dơi D. Chuột Túi đáp án đúng B
+Câu 6: 1 + 1 x 0 = ? A. 0 B. 1 C. 2 D. 10 DA B
+Câu 7: Trong tin học, CPU là viết tắt của? A. Central Processing Unit B. Control Power Unit C. Central Power Unit D. Computer Personal Unit đáp án: A
+Câu 8: Đỉnh núi cao nhất thế giới nằm ở châu lục nào? A. Châu Âu B. Châu Phi C. Châu Á D. Châu Mỹ đáp án đúng C
+Câu 9: World Cup 2022 được tổ chức ở đâu? A. Nga B. Brazil C. Qatar D. Pháp DA C
+Câu 10: Màu nào không có trong cầu vồng? A. Đỏ B. Tím C. Nâu D. Lam đáp án đúng C
+---
+câu promt nhanh để nhập dữ liệu câu hỏi:
+chọn đáp án đúng các câu trắc nghiệm trong file docs tôi gửi và trình bày như sau: Câu 1: Thủ đô của Việt Nam là gì? A. Huế B. Hà Nội C. TP.HCM D. Đà Nẵng đáp án đúng B
+
+Câu 2: Công thức hóa học của nước là? A. HO B. H2O C. CO2 D. O2 DA B
+
+Câu 3: Ai là người phát minh ra bóng đèn điện?
+
+A. Thomas Edison
+
+B. Nikola Tesla
+
+C. Albert Einstein
+
+D. Isaac Newton
+
+Đáp án đúng: A
